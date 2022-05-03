@@ -12,11 +12,11 @@ class ClientAdmin(admin.ModelAdmin):
 
 
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ('name', 'amount', 'date_creation', 'date_signature', 'status')
+    list_display = ('client', 'name', 'amount', 'date_creation', 'date_signature', 'status')
 
 
 class EvenementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'type', 'description', 'localisation',
+    list_display = ('user', 'contract', 'title', 'type', 'description', 'localisation',
                     'date_event_begin', 'date_event_end')
 
 
