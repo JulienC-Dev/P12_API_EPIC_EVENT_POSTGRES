@@ -1,9 +1,10 @@
 from django.contrib import admin
-from .models import (User, Client, Contract, Evenement)
+from .models import (Client, Contract, Evenement)
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 
 
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email')
+UserAdmin.list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'date_joined', 'is_staff')
 
 
 class ClientAdmin(admin.ModelAdmin):
@@ -16,10 +17,11 @@ class ContractAdmin(admin.ModelAdmin):
 
 
 class EvenementAdmin(admin.ModelAdmin):
-    list_display = ('user', 'contract', 'title', 'type', 'description', 'localisation',
+    list_display = ('contract', 'title', 'type', 'description', 'localisation',
                     'date_event_begin', 'date_event_end')
 
 
+admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Contract, ContractAdmin)

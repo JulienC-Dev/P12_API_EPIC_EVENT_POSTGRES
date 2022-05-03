@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'epic.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'e',
+        'NAME': 'edb',
         'USER': 'julien',
         'PASSWORD': 'julien',
         'HOST': 'localhost',
@@ -85,7 +85,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'myapp.User'
+
 
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 

@@ -1,12 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
-
-
-class User(AbstractUser):
-    pass
+from django.contrib.auth.models import User
 
 
 class Client(models.Model):
@@ -31,7 +26,7 @@ class Contract(models.Model):
         ('nonsigne', _('Non signé')),
         ('signe', _('Signé')),
     )
-
+    contrat_id = models.AutoField(primary_key=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     name = models.CharField(max_length=28)
     amount = models.IntegerField()
@@ -40,7 +35,7 @@ class Contract(models.Model):
     status = models.CharField(choices=TYPE_STATUS, max_length=28, default='nonsigne')
 
     def __str__(self):
-        return f'{self.client}'
+        return f'{self.contrat_id}'
 
 
 class Evenement(models.Model):
@@ -49,9 +44,8 @@ class Evenement(models.Model):
         ('mariage', _('Mariage')),
         ('nouvelan', _('Nouvel an')),
     )
-    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, verbose_name="client contract")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='personnel_assignee',
-                             verbose_name="employee")
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
+    employee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=28)
     type = models.CharField(choices=TYPE_EVENT, max_length=28, default="anniversaire")
     description = models.CharField(max_length=28)
