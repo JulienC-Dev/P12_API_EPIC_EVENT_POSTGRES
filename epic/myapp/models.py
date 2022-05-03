@@ -1,10 +1,15 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+
+
+class CustomEmployee(AbstractUser):
+    is_staff = models.BooleanField(default=True)
 
 
 class Client(models.Model):
+    client_id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=28)
     last_name = models.CharField(max_length=28)
     email = models.EmailField(max_length=28)
@@ -45,7 +50,7 @@ class Evenement(models.Model):
         ('nouvelan', _('Nouvel an')),
     )
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
-    employee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    employee = models.ForeignKey(CustomEmployee, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=28)
     type = models.CharField(choices=TYPE_EVENT, max_length=28, default="anniversaire")
     description = models.CharField(max_length=28)
