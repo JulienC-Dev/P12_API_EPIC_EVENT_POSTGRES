@@ -11,17 +11,17 @@ class CustomUserAdmin(UserAdmin):
             groups.append(group.name)
         return ' '.join(groups)
     group.short_description = 'Groups'
-    UserAdmin.list_display = ('username', 'email', 'is_active',
+    UserAdmin.list_display = ('id', 'username', 'email', 'is_active',
                               'date_joined', 'is_staff', 'group')
 
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name', 'email', 'compagny',
+    list_display = ('client_id', 'first_name', 'last_name', 'email', 'compagny',
                     'phone_number', 'date_creation', 'date_update', 'prospect')
 
 
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ('client', 'name', 'amount', 'date_creation', 'date_signature', 'status')
+    list_display = ('client_id', 'client', 'name', 'amount', 'date_creation', 'date_signature', 'status')
 
 
 class EvenementAdmin(admin.ModelAdmin):
