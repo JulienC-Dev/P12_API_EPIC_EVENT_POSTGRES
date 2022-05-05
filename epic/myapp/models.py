@@ -36,45 +36,11 @@ def date_check(value):
         raise ValidationError("Vous ne pouvez pas réserver une date antérieur")
 
 
-
-
-
-
-
-
-class Evenement(models.Model):
-    TYPE_EVENT = (
-        ('anniversaire', _('Anniversaire')),
-        ('mariage', _('Mariage')),
-        ('nouvelan', _('Nouvel an')),
-    )
-
-    employee = models.ForeignKey(CustomEmployee, on_delete=models.SET_NULL, null=True, blank=True)
-    title = models.CharField(max_length=28, null=True, blank=True)
-    type = models.CharField(choices=TYPE_EVENT, max_length=28, default="anniversaire")
-    description = models.CharField(max_length=28, null=True, blank=True)
-    ville = models.CharField(max_length=28, null=True, blank=True)
-    date_event_begin = models.DateTimeField(validators=[date_check], null=True, blank=True)
-    date_event_end = models.DateTimeField(validators=[date_check], null=True, blank=True)
-
-    def clean(self):
-        if self.date_event_end is None and self.date_event_begin is not None:
-            raise ValidationError("Veuillez saisir une date de fin d'événement")
-        if self.date_event_end is not None and self.date_event_begin is None:
-            raise ValidationError("Veuillez saisir une date de début d'événement")
-        if self.date_event_begin > self.date_event_end:
-            raise ValidationError("La date de fin de l'événement ne doit pas être inférieur à la date de commencement")
-
-    def __str__(self):
-        return f'{self.title}'
-
-
 class Contract(models.Model):
     TYPE_STATUS = (
         ('nonsigne', _('Non signé')),
         ('signe', _('Signé')),
     )
-    event = models.ForeignKey(Evenement, on_delete=models.SET_NULL)
     contrat_id = models.AutoField(primary_key=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     name = models.CharField(max_length=28)
@@ -89,8 +55,10 @@ class Contract(models.Model):
         if self.date_signature is not None and self.status == "nonsigne":
             raise ValidationError('Le contrat doit être en status signé ')
 
+
     def __str__(self):
         return f'{self.contrat_id}'
+
 
 @receiver(post_save, sender=Contract)
 def event_created_new_contract(sender, instance, **kwargs):
@@ -98,3 +66,37 @@ def event_created_new_contract(sender, instance, **kwargs):
         instance.client.prospect = False
         instance.client.save()
         Evenement(contract=instance).save()
+
+def VV_check(value):
+    if value < tz.now():
+        raise ValidationError("Vous ne pouvez pas réserver une date antérieur")
+
+class Evenement(models.Model):
+    TYPE_EVENT = (
+        ('anniversaire', _('Anniversaire')),
+        ('mariage', _('Mariage')),
+        ('nouvelan', _('Nouvel an')),
+    )
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
+    employee = models.ForeignKey(CustomEmployee, on_delete=models.SET_NULL, null=True, blank=True)
+    title = models.CharField(max_length=28, null=True, blank=True)
+    type = models.CharField(choices=TYPE_EVENT, max_length=28, default="anniversaire")
+    description = models.CharField(max_length=28, null=True, blank=True)
+    ville = models.CharField(max_length=28, null=True, blank=True)
+    date_event_begin = models.DateTimeField(validators=[VV_check], null=True, blank=True)
+    date_event_end = models.DateTimeField(validators=[VV_check], null=True, blank=True)
+
+    def clean(self):
+        if self.date_event_end is None and self.date_event_begin is not None:
+            raise ValidationError("Veuillez saisir une date de fin d'événement")
+        if self.date_event_end is not None and self.date_event_begin is None:
+            raise ValidationError("Veuillez saisir une date de début d'événement")
+        if self.date_event_begin > self.date_event_end:
+            raise ValidationError("La date de fin de l'événement ne doit pas être inférieur à la date de commencement")
+
+
+    def __str__(self):
+        return f'{self.title}'
+
+
+
