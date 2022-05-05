@@ -28,35 +28,18 @@ class Client(models.Model):
     prospect = models.BooleanField(default=True)
 
     def __str__(self):
-        return f'{self.first_name}'
+        return f'{self.client_id}'
 
 
-def validate_date(date_signature):
-    if date_signature < tz.now():
-        raise ValidationError("Date cannot be in the past")
+def date_check(value):
+    if value < tz.now():
+        raise ValidationError("Vous ne pouvez pas réserver une date antérieur")
 
 
-class Contract(models.Model):
-    TYPE_STATUS = (
-        ('nonsigne', _('Non signé')),
-        ('signe', _('Signé')),
-    )
-    contrat_id = models.AutoField(primary_key=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    name = models.CharField(max_length=28)
-    amount = models.IntegerField(validators=[MinValueValidator(1000)])
-    date_creation = models.DateTimeField(auto_now_add=True)
-    date_signature = models.DateTimeField(validators=[validate_date], null=True, blank=True)
-    status = models.CharField(choices=TYPE_STATUS, max_length=28, default='nonsigne')
-
-    def __str__(self):
-        return f'{self.contrat_id}'
 
 
-@receiver(post_save, sender=Contract)
-def event_created_with_new_contract(sender, instance, **kwargs):
-    if instance.evenement_set.count() == 0:
-        Evenement(contract=instance).save()
+
+
 
 
 class Evenement(models.Model):
@@ -65,17 +48,53 @@ class Evenement(models.Model):
         ('mariage', _('Mariage')),
         ('nouvelan', _('Nouvel an')),
     )
-    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
+
     employee = models.ForeignKey(CustomEmployee, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=28, null=True, blank=True)
     type = models.CharField(choices=TYPE_EVENT, max_length=28, default="anniversaire")
     description = models.CharField(max_length=28, null=True, blank=True)
-    localisation = models.IntegerField(null=True, blank=True)
-    date_event_begin = models.DateTimeField(null=True, blank=True)
-    date_event_end = models.DateTimeField(null=True, blank=True)
+    ville = models.CharField(max_length=28, null=True, blank=True)
+    date_event_begin = models.DateTimeField(validators=[date_check], null=True, blank=True)
+    date_event_end = models.DateTimeField(validators=[date_check], null=True, blank=True)
+
+    def clean(self):
+        if self.date_event_end is None and self.date_event_begin is not None:
+            raise ValidationError("Veuillez saisir une date de fin d'événement")
+        if self.date_event_end is not None and self.date_event_begin is None:
+            raise ValidationError("Veuillez saisir une date de début d'événement")
+        if self.date_event_begin > self.date_event_end:
+            raise ValidationError("La date de fin de l'événement ne doit pas être inférieur à la date de commencement")
 
     def __str__(self):
         return f'{self.title}'
 
 
+class Contract(models.Model):
+    TYPE_STATUS = (
+        ('nonsigne', _('Non signé')),
+        ('signe', _('Signé')),
+    )
+    event = models.ForeignKey(Evenement, on_delete=models.SET_NULL)
+    contrat_id = models.AutoField(primary_key=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    name = models.CharField(max_length=28)
+    amount = models.IntegerField(validators=[MinValueValidator(1000)])
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_signature = models.DateTimeField(validators=[date_check], null=True, blank=True)
+    status = models.CharField(choices=TYPE_STATUS, max_length=28, default='nonsigne')
 
+    def clean(self):
+        if self.date_signature is None and self.status == "signe":
+            raise ValidationError('Le contrat ne peut être signé sans date')
+        if self.date_signature is not None and self.status == "nonsigne":
+            raise ValidationError('Le contrat doit être en status signé ')
+
+    def __str__(self):
+        return f'{self.contrat_id}'
+
+@receiver(post_save, sender=Contract)
+def event_created_new_contract(sender, instance, **kwargs):
+    if instance.evenement_set.count() == 0:
+        instance.client.prospect = False
+        instance.client.save()
+        Evenement(contract=instance).save()

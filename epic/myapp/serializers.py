@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Client, CustomEmployee, Contract, Evenement
+from django.utils import timezone as tz
+from django.core.exceptions import ValidationError
 
 
 class EmployeeAdminSerializers(serializers.ModelSerializer):
@@ -30,6 +32,11 @@ class ClientSerializers(serializers.ModelSerializer):
                   'prospect']
 
 
+def validate_date(date_signature):
+    if date_signature < tz.now():
+        raise ValidationError("Date cannot be in the past")
+
+
 class ContractSerializers(serializers.ModelSerializer):
 
     date_creation = serializers.DateTimeField(
@@ -38,6 +45,7 @@ class ContractSerializers(serializers.ModelSerializer):
         required=False)
 
     date_signature = serializers.DateTimeField(
+        validators=[validate_date],
         input_formats=["%d-%m-%Y %H:%M"],
         format="%d-%m-%Y %H:%M",
         required=False,

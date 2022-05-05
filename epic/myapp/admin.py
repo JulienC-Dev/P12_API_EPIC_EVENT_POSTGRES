@@ -21,11 +21,11 @@ class ClientAdmin(admin.ModelAdmin):
 
 
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ('client_id', 'client', 'name', 'amount', 'date_creation', 'date_signature', 'status')
+    list_display = ('contrat_id', 'client', 'name', 'amount', 'date_creation', 'date_signature', 'status')
 
 
 class EvenementAdmin(admin.ModelAdmin):
-    list_display = ('contract', 'employee', 'title', 'type', 'description', 'localisation',
+    list_display = ('contract', 'employee', 'title', 'type', 'description', 'ville',
                     'date_event_begin', 'date_event_end')
 
 
