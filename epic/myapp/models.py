@@ -62,7 +62,7 @@ class Contract(models.Model):
 
 @receiver(post_save, sender=Contract)
 def event_created_new_contract(sender, instance, **kwargs):
-    if instance.evenement_set.count() == 0:
+    if instance.evenement_set.count() == 0 and instance.status =="signe":
         instance.client.prospect = False
         instance.client.save()
         Evenement(contract=instance).save()
@@ -91,8 +91,8 @@ class Evenement(models.Model):
             raise ValidationError("Veuillez saisir une date de fin d'événement")
         if self.date_event_end is not None and self.date_event_begin is None:
             raise ValidationError("Veuillez saisir une date de début d'événement")
-        if self.date_event_begin > self.date_event_end:
-            raise ValidationError("La date de fin de l'événement ne doit pas être inférieur à la date de commencement")
+        # if self.date_event_begin > self.date_event_end:
+        #     raise ValidationError("La date de fin de l'événement ne doit pas être inférieur à la date de commencement")
 
 
     def __str__(self):
