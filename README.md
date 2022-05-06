@@ -1,7 +1,7 @@
 
 
 
-# Développement d'une API via Django REST/ Back-end PostSQL - le front-end est le site d'administration Django
+# Développement d'une API via Django REST/ Back-end PostSQL - 
 
 ## Overview
 
