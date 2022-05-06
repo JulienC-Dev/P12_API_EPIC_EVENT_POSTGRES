@@ -28,9 +28,9 @@ class Client(models.Model):
     date_update = models.DateTimeField(auto_now_add=True)
     prospect = models.BooleanField(default=True)
 
-
     def __str__(self):
         return f'{self.client_id}'
+
 
 def date_check(value):
     if value < tz.now():
@@ -52,7 +52,6 @@ class Contract(models.Model):
 
     class Meta:
         unique_together = ['client', 'name']
-
 
     def clean(self):
         if self.date_signature is None and self.status == "signe":
@@ -100,11 +99,3 @@ class Evenement(models.Model):
 
     def __str__(self):
         return f'{self.title}'
-
-
-# Les modèles sont unis par des relations, gérées par les exigences fonctionnelles, dont les suivantes :
-# Les membres de l'équipe de vente ont des clients.
-# Les membres de l'équipe de support ont des événements.
-# Un client a des contrats.
-# Un contrat a un statut de contrat.
-# Les contrats ont un événement.
