@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from django.shortcuts import get_object_or_404
-from .models import Client, CustomEmployee, Contract
+from .models import Client,  Contract, CustomEmployee
 
 
 class EmployeeAPIView(viewsets.ModelViewSet):

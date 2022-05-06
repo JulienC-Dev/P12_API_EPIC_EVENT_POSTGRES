@@ -1,12 +1,12 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone as tz
+from django.contrib.auth.models import AbstractUser
 
 
 class CustomEmployee(AbstractUser):
@@ -15,6 +15,7 @@ class CustomEmployee(AbstractUser):
 
 class Client(models.Model):
     client_id = models.AutoField(primary_key=True)
+    employee = models.ForeignKey(CustomEmployee, on_delete=models.SET_NULL, null=True, blank=True)
     first_name = models.CharField(max_length=28)
     last_name = models.CharField(max_length=28)
     email = models.EmailField(max_length=28)
@@ -27,9 +28,9 @@ class Client(models.Model):
     date_update = models.DateTimeField(auto_now_add=True)
     prospect = models.BooleanField(default=True)
 
+
     def __str__(self):
         return f'{self.client_id}'
-
 
 def date_check(value):
     if value < tz.now():
@@ -49,12 +50,15 @@ class Contract(models.Model):
     date_signature = models.DateTimeField(validators=[date_check], null=True, blank=True)
     status = models.CharField(choices=TYPE_STATUS, max_length=28, default='nonsigne')
 
+    class Meta:
+        unique_together = ['client', 'name']
+
+
     def clean(self):
         if self.date_signature is None and self.status == "signe":
             raise ValidationError('Le contrat ne peut être signé sans date')
         if self.date_signature is not None and self.status == "nonsigne":
             raise ValidationError('Le contrat doit être en status signé ')
-
 
     def __str__(self):
         return f'{self.contrat_id}'
@@ -67,9 +71,6 @@ def event_created_new_contract(sender, instance, **kwargs):
         instance.client.save()
         Evenement(contract=instance).save()
 
-def VV_check(value):
-    if value < tz.now():
-        raise ValidationError("Vous ne pouvez pas réserver une date antérieur")
 
 class Evenement(models.Model):
     TYPE_EVENT = (
@@ -83,20 +84,27 @@ class Evenement(models.Model):
     type = models.CharField(choices=TYPE_EVENT, max_length=28, default="anniversaire")
     description = models.CharField(max_length=28, null=True, blank=True)
     ville = models.CharField(max_length=28, null=True, blank=True)
-    date_event_begin = models.DateTimeField(validators=[VV_check], null=True, blank=True)
-    date_event_end = models.DateTimeField(validators=[VV_check], null=True, blank=True)
+    date_event_begin = models.DateTimeField(validators=[date_check], null=True, blank=True)
+    date_event_end = models.DateTimeField(validators=[date_check], null=True, blank=True)
+
+    class Meta:
+        unique_together = ['contract', ]
 
     def clean(self):
+        if self.contract.status == "nonsigne":
+            raise ValidationError("Veuillez signer le contrat")
         if self.date_event_end is None and self.date_event_begin is not None:
             raise ValidationError("Veuillez saisir une date de fin d'événement")
         if self.date_event_end is not None and self.date_event_begin is None:
             raise ValidationError("Veuillez saisir une date de début d'événement")
-        # if self.date_event_begin > self.date_event_end:
-        #     raise ValidationError("La date de fin de l'événement ne doit pas être inférieur à la date de commencement")
-
 
     def __str__(self):
         return f'{self.title}'
 
 
-
+# Les modèles sont unis par des relations, gérées par les exigences fonctionnelles, dont les suivantes :
+# Les membres de l'équipe de vente ont des clients.
+# Les membres de l'équipe de support ont des événements.
+# Un client a des contrats.
+# Un contrat a un statut de contrat.
+# Les contrats ont un événement.

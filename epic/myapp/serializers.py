@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, CustomEmployee, Contract, Evenement
+from .models import Client, Contract, Evenement, CustomEmployee
 from django.utils import timezone as tz
 from django.core.exceptions import ValidationError
 
