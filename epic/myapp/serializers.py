@@ -2,28 +2,28 @@ from rest_framework import serializers
 from .models import Client, Contract, Evenement, CustomEmployee
 from django.utils import timezone as tz
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import Group
 
 
 class EmployeeAdminSerializers(serializers.ModelSerializer):
+    groups = serializers.SlugRelatedField(
+        many=True,
+        queryset= Group.objects.all(),
+        slug_field='name'
+    )
+
     class Meta:
         model = CustomEmployee
         fields = ['id', 'password', 'username', 'email', 'last_name', 'is_staff', 'groups']
-        extra_kwargs = {'password': {'write_only': True, 'required': True}}
+        extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('is_active', 'is_staff')
-
-        def create(self, validated_data):
-            password = validated_data.pop("password", None)
-            instance = self.Meta.model(**validated_data)
-            if password is not None:
-                instance.set_password(password)
-            instance.save()
-            return instance
 
 
 class ClientSerializers(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = ['client_id',
+                  'employee',
                   'first_name',
                   'last_name',
                   'email',
@@ -60,10 +60,36 @@ class ContractSerializers(serializers.ModelSerializer):
                   'date_creation',
                   'date_signature',
                   'status']
-        read_only_fields = ['contrat_id']
+        read_only_fields = ['contrat_id', 'client']
 
-    def create(self, validated_data):
-        instance = self.Meta.model(**validated_data)
-        instance.save()
-        Evenement(contract=instance).save()
-        return instance
+    def validate(self, attrs):
+        instance = Contract(**attrs)
+        instance.clean()
+        return attrs
+
+
+class EvenementSerializers(serializers.ModelSerializer):
+    date_event_begin = serializers.DateTimeField(
+        validators=[validate_date],
+        input_formats=["%d-%m-%Y %H:%M"],
+        format="%d-%m-%Y %H:%M",
+        required=False,
+    )
+    date_event_end = serializers.DateTimeField(
+        validators=[validate_date],
+        input_formats=["%d-%m-%Y %H:%M"],
+        format="%d-%m-%Y %H:%M",
+        required=False,
+    )
+
+    class Meta:
+        model = Evenement
+        fields = ['contract,'
+                  'employee',
+                  'title',
+                  'type',
+                  'description',
+                  'ville',
+                  'date_event_begin',
+                  'date_event_end']
+        read_only_fields = ['contrat_id', 'date_event_begin']

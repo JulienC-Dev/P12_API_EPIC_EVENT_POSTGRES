@@ -67,8 +67,13 @@ class ContractAdmin(admin.ModelAdmin):
 
 
 class EvenementAdmin(admin.ModelAdmin):
-    list_display = ('contract', 'employee', 'title', 'type', 'description', 'ville',
+    list_display = ('contract', 'client', 'employee', 'title', 'type', 'description', 'ville',
                     'date_event_begin', 'date_event_end')
+
+    def client(self, obj):
+        return obj.contract.client
+
+
 
     def has_change_permission(self, request, obj=None):
         if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:

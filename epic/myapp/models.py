@@ -28,6 +28,9 @@ class Client(models.Model):
     date_update = models.DateTimeField(auto_now_add=True)
     prospect = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ['first_name', 'last_name']
+
     def __str__(self):
         return f'{self.client_id}'
 
@@ -96,6 +99,8 @@ class Evenement(models.Model):
             raise ValidationError("Veuillez saisir une date de fin d'événement")
         if self.date_event_end is not None and self.date_event_begin is None:
             raise ValidationError("Veuillez saisir une date de début d'événement")
+        if self.date_event_end < self.date_event_begin:
+            raise ValidationError("La date de fin ne peut pas avant la date de début")
 
     def __str__(self):
         return f'{self.title}'
