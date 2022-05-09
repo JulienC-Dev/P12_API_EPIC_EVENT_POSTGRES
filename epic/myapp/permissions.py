@@ -2,10 +2,16 @@ from rest_framework import permissions
 
 
 class CustomEmployeePermissions(permissions.DjangoModelPermissions):
-
     def has_permission(self, request, view):
-        print(bool(request.user))
-        return bool(request.user and request.user.is_authenticated)
+        if request.method == "POST" or request.method == "PUT" or request.method == "DELETE" or request.method == "GET":
+            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
+                return True
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
+            return True
+        return False
 
 
 class CustomClientPermissions(permissions.DjangoModelPermissions):
@@ -23,14 +29,12 @@ class CustomClientPermissions(permissions.DjangoModelPermissions):
         if request.method == "GET":
             return True
         if request.method == "PUT":
-            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True or \
-                    request.user.groups.filter(name='groupe de vente').exists():
+            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
                 return True
             if obj is not None and obj.employee == request.user:
                 return True
         if request.method == "DELETE":
-            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True or \
-                    request.user.groups.filter(name='groupe de vente').exists():
+            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
                 return True
             if obj is not None and obj.employee == request.user:
                 return True
@@ -52,14 +56,13 @@ class CustomContractPermissions(permissions.DjangoModelPermissions):
         if request.method == "GET":
             return True
         if request.method == "PUT":
-            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True or \
-                    request.user.groups.filter(name='groupe de vente').exists():
+            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
                 return True
             if obj is not None and obj.client.employee == request.user:
                 return True
+
         if request.method == "DELETE":
-            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True or \
-                    request.user.groups.filter(name='groupe de vente').exists():
+            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
                 return True
             if obj is not None and obj.client.employee == request.user:
                 return True
@@ -79,16 +82,19 @@ class CustomEvenementPermissions(permissions.DjangoModelPermissions):
         if request.method == "GET":
             return True
         if request.method == "PUT":
-            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True or \
-                    request.user.groups.filter(name='groupe de vente').exists():
+            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
                 return True
             if obj is not None and obj.employee == request.user:
                 return True
+            if obj is not None and obj.contract.client.employee == request.user:
+                return True
+
         if request.method == "DELETE":
-            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True or \
-                    request.user.groups.filter(name='groupe de vente').exists():
+            if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
                 return True
             if obj is not None and obj.employee == request.user:
+                return True
+            if obj is not None and obj.contract.client.employee == request.user:
                 return True
         return False
 

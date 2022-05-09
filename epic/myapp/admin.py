@@ -30,10 +30,10 @@ class CustomEmployeeAdmin(UserAdmin):
 
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('client_id', 'employee_service_support', 'first_name', 'last_name', 'email', 'compagny',
+    list_display = ('client_id', 'employee_service_vente', 'first_name', 'last_name', 'email', 'compagny',
                     'phone_number', 'date_creation', 'date_update', 'prospect')
 
-    def employee_service_support(self, obj):
+    def employee_service_vente(self, obj):
         return obj.employee
 
     def has_change_permission(self, request, obj=None):
@@ -52,13 +52,20 @@ class ClientAdmin(admin.ModelAdmin):
 
 
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ('id_contract', 'id_client', 'name', 'amount', 'date_creation', 'date_signature', 'status')
+    list_display = ('id_contract', 'id_client', 'client_last_name', 'employee_service_vente', 'name', 'amount',
+                    'date_creation', 'date_signature', 'status')
 
     def id_contract(self, obj):
         return obj.contrat_id
 
     def id_client(self, obj):
         return obj.client
+
+    def client_last_name(self, obj):
+        return obj.client.last_name
+
+    def employee_service_vente(self, obj):
+        return obj.client.employee
 
     def has_change_permission(self, request, obj=None):
         if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
@@ -76,8 +83,8 @@ class ContractAdmin(admin.ModelAdmin):
 
 
 class EvenementAdmin(admin.ModelAdmin):
-    list_display = ('id_evenement', 'id_contract', 'id_client', 'responsable_event', 'title', 'type', 'description', 'ville',
-                    'date_event_begin', 'date_event_end')
+    list_display = ('id_evenement', 'id_contract', 'id_client', 'client_last_name',
+                    'responsable_event_support', 'title', 'type', 'description', 'ville', 'date_event_begin', 'date_event_end')
 
     def id_client(self, obj):
         return obj.contract.client
@@ -88,13 +95,18 @@ class EvenementAdmin(admin.ModelAdmin):
     def id_contract(self, obj):
         return obj.contract
 
-    def responsable_event(self, obj):
+    def responsable_event_support(self, obj):
         return obj.employee
+
+    def client_last_name(self, obj):
+        return obj.contract.client.last_name
 
     def has_change_permission(self, request, obj=None):
         if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
             return True
         if obj is not None and obj.employee == request.user:
+            return True
+        if obj is not None and obj.contract.client.employee == request.user:
             return True
         return False
 
@@ -102,6 +114,8 @@ class EvenementAdmin(admin.ModelAdmin):
         if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
             return True
         if obj is not None and obj.employee == request.user:
+            return True
+        if obj is not None and obj.contract.client.employee == request.user:
             return True
         return False
 

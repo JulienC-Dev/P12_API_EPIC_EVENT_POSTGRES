@@ -102,8 +102,9 @@ class Evenement(models.Model):
             raise ValidationError("Veuillez saisir une date de fin d'événement")
         if self.date_event_end is not None and self.date_event_begin is None:
             raise ValidationError("Veuillez saisir une date de début d'événement")
-        if self.date_event_end < self.date_event_begin:
-            raise ValidationError("La date de fin ne peut pas avant la date de début")
+        if self.date_event_end and self.date_event_begin is not None:
+            if self.date_event_end < self.date_event_begin:
+                raise ValidationError("La date de fin ne peut pas avant la date de début")
 
     def __str__(self):
         return f'{self.title}'

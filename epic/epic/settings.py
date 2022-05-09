@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'myapp.apps.MyappConfig',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -144,11 +145,8 @@ SIMPLE_JWT = {
 TIME_ZONE = 'Europe/Paris'
 
 
-# USE_I18N = True
 USE_L10N = True
-# USE_TZ = False
-# DATE_FORMAT = 'd-m-Y'
-# DATETIME_FORMAT = (( 'd-m-Y H:i' ))
+
 DATETIME_INPUT_FORMATS = (("%d-%m-%Y %H:%M"),)
 
 

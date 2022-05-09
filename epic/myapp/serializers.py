@@ -8,7 +8,7 @@ from django.contrib.auth.models import Group
 class EmployeeAdminSerializers(serializers.ModelSerializer):
     groups = serializers.SlugRelatedField(
         many=True,
-        queryset= Group.objects.all(),
+        queryset=Group.objects.all(),
         slug_field='name'
     )
 
@@ -82,6 +82,7 @@ class EvenementSerializers(serializers.ModelSerializer):
         required=False,
     )
     evenenement_id = serializers.PrimaryKeyRelatedField(read_only=True, source='id')
+
     class Meta:
         model = Evenement
         fields = ['evenenement_id',
@@ -98,6 +99,3 @@ class EvenementSerializers(serializers.ModelSerializer):
         instance = Evenement(**attrs)
         instance.clean()
         return attrs
-
-
-
