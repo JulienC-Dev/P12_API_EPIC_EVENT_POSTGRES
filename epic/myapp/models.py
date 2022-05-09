@@ -12,6 +12,9 @@ from django.contrib.auth.models import AbstractUser
 class CustomEmployee(AbstractUser):
     is_staff = models.BooleanField(default=True)
 
+    class Meta:
+        verbose_name = _("Employee")
+
 
 class Client(models.Model):
     client_id = models.AutoField(primary_key=True)

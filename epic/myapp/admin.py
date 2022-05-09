@@ -30,8 +30,11 @@ class CustomEmployeeAdmin(UserAdmin):
 
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('client_id', 'employee', 'first_name', 'last_name', 'email', 'compagny',
+    list_display = ('client_id', 'employee_service_support', 'first_name', 'last_name', 'email', 'compagny',
                     'phone_number', 'date_creation', 'date_update', 'prospect')
+
+    def employee_service_support(self, obj):
+        return obj.employee
 
     def has_change_permission(self, request, obj=None):
         if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
@@ -49,7 +52,13 @@ class ClientAdmin(admin.ModelAdmin):
 
 
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ('contrat_id', 'client', 'name', 'amount', 'date_creation', 'date_signature', 'status')
+    list_display = ('id_contract', 'id_client', 'name', 'amount', 'date_creation', 'date_signature', 'status')
+
+    def id_contract(self, obj):
+        return obj.contrat_id
+
+    def id_client(self, obj):
+        return obj.client
 
     def has_change_permission(self, request, obj=None):
         if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:
@@ -67,13 +76,20 @@ class ContractAdmin(admin.ModelAdmin):
 
 
 class EvenementAdmin(admin.ModelAdmin):
-    list_display = ('contract', 'client', 'employee', 'title', 'type', 'description', 'ville',
+    list_display = ('id_evenement', 'id_contract', 'id_client', 'responsable_event', 'title', 'type', 'description', 'ville',
                     'date_event_begin', 'date_event_end')
 
-    def client(self, obj):
+    def id_client(self, obj):
         return obj.contract.client
 
+    def id_evenement(self, obj):
+        return obj.id
 
+    def id_contract(self, obj):
+        return obj.contract
+
+    def responsable_event(self, obj):
+        return obj.employee
 
     def has_change_permission(self, request, obj=None):
         if request.user.groups.filter(name='groupe de gestion').exists() or request.user.is_superuser == True:

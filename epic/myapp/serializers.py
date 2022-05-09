@@ -60,7 +60,7 @@ class ContractSerializers(serializers.ModelSerializer):
                   'date_creation',
                   'date_signature',
                   'status']
-        read_only_fields = ['contrat_id', 'client']
+        read_only_fields = ['contrat_id']
 
     def validate(self, attrs):
         instance = Contract(**attrs)
@@ -81,10 +81,11 @@ class EvenementSerializers(serializers.ModelSerializer):
         format="%d-%m-%Y %H:%M",
         required=False,
     )
-
+    evenenement_id = serializers.PrimaryKeyRelatedField(read_only=True, source='id')
     class Meta:
         model = Evenement
-        fields = ['contract,'
+        fields = ['evenenement_id',
+                  'contract',
                   'employee',
                   'title',
                   'type',
@@ -92,4 +93,11 @@ class EvenementSerializers(serializers.ModelSerializer):
                   'ville',
                   'date_event_begin',
                   'date_event_end']
-        read_only_fields = ['contrat_id', 'date_event_begin']
+
+    def validate(self, attrs):
+        instance = Evenement(**attrs)
+        instance.clean()
+        return attrs
+
+
+
