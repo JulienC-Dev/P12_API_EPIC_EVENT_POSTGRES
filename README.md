@@ -22,7 +22,7 @@ différents rôles et permissions au niveau des utilisateurs/employés (service 
 * Créer divers clients(prospect ou non)/contrats/événements/employés
 * D'ajouter un employé à un événement spécifique en fonction des permissions du service
 * de créer automatique un événement lors de la signature d'un contrat 
-
+* Rechercher par filtres
 
 L'Authentification des employés est réalisée via JWT (JSON Web Token)- L'Authentification est obligatoire.
 
