@@ -1,7 +1,7 @@
 
 
 
-# Développement d'une API via Django REST/ Back-end PostSQL - 
+# Développement d'une API via Django REST/ Back-end PostSQL 
 
 ## Overview
 
